@@ -6,7 +6,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { api } from "@/utils/api";
 
 import "@/styles/globals.css";
-import Layout from "@/components/Layout";
+import Layout from "./app.layout";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
