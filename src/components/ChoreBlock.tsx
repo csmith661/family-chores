@@ -2,6 +2,7 @@
 import { useDraggable } from "@dnd-kit/core";
 import { type ReactNode, useMemo } from "react";
 import clsx from "clsx";
+import { DraggableChore } from "@/pages";
 
 export function DraggableChoreBlock(props: {
   id: number;
@@ -31,8 +32,8 @@ export function DraggableChoreBlock(props: {
   );
 }
 
-export function Chore(props: { title: string; assignee: string; id: number }) {
-  const { title, assignee } = props;
+export function Chore(props: { DraggableChore: DraggableChore }) {
+  const { chore_name, assignee } = props.DraggableChore;
 
   const assigneeBackgroundColor = useMemo(() => {
     switch (assignee) {
@@ -61,19 +62,17 @@ export function Chore(props: { title: string; assignee: string; id: number }) {
         "relative",
       )}
     >
-      <h3>{title}</h3>
+      <h3>{chore_name}</h3>
     </div>
   );
 }
 
 export function ListedChore(props: {
-  title: string;
-  assignee: string;
-  id: number;
-  handleClose: (id: number, day: string) => void;
-  day: string;
+  draggableChore: DraggableChore;
+  handleClose: (id: number, day: number) => void;
+  day: number;
 }) {
-  const { title, assignee, id } = props;
+  const { chore_name, assignee, id } = props.draggableChore;
 
   const assigneeBackgroundColor = useMemo(() => {
     switch (assignee) {
@@ -100,7 +99,7 @@ export function ListedChore(props: {
         "relative",
       )}
     >
-      <h3 className="text-center">{title}</h3>
+      <h3 className="text-center">{chore_name}</h3>
       <button
         className={" hover:text-red-300"}
         onClick={() => {

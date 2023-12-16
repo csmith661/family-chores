@@ -6,15 +6,36 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url = env("DATABASE_URL")
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
   relationMode = "prisma"
 }
 
-
 model User {
-    id                      String                   @id @default(cuid())
-    name                    String?
-    email                   String                   @unique
-    emailVerified           DateTime?
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+}
+
+model Chore {
+  id         Int    @id @default(autoincrement())
+  chore_name String @unique
+  assignee String
+  Selected_Chore SelectedChore[]
+}
+
+model SelectedChore {
+  id           Int   @id @default(autoincrement())
+  chore        Chore @relation(fields: [chore_id], references: [id])
+  chore_id     Int
+  assigned_day Int
+
+  Week   Week? @relation(fields: [weekId], references: [id])
+  weekId Int?
+}
+
+model Week {
+  id     Int              @id
+  chores SelectedChore[]
 }
