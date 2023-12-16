@@ -9,13 +9,16 @@ export function DraggableChoreBlock(props: {
   children: ReactNode;
 }) {
   const { id } = props;
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id,
-  });
+  const { attributes, listeners, setNodeRef, transform, active } = useDraggable(
+    {
+      id,
+    },
+  );
 
   const style = transform
     ? {
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+        opacity: active ? "0" : "1",
       }
     : undefined;
 

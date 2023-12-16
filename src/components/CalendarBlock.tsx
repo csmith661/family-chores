@@ -37,7 +37,7 @@ export function CalendarBlock(props: {
 }) {
   return (
     <>
-      <div className="border border-white p-2">
+      <div className="z-40 border border-white p-2">
         <h2 className="text-center font-bold">{`${props.dateForCalendar}`}</h2>
       </div>
       <div className="no-scrollbar h-[90%] overflow-y-scroll">
