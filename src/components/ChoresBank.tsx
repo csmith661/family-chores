@@ -1,4 +1,4 @@
-import { useActiveChoresQuery } from "@/hook/useActiveChoresQuery";
+import { useChoresBankQuery } from "@/hook/useChoresBank";
 import { DraggableChoreBlock, Chore } from "./ChoreBlock";
 import { Button, Input, Modal, Select } from "antd";
 import { useState } from "react";
@@ -6,7 +6,7 @@ import { useCallback } from "react";
 import { useCreateChoresQuery } from "@/hook/useCreateNewChore";
 
 export function ChoresBank() {
-  const choresBankQuery = useActiveChoresQuery();
+  const choresBankQuery = useChoresBankQuery();
 
   const addChoresToDatabase = useCreateChoresQuery();
 
@@ -25,13 +25,25 @@ export function ChoresBank() {
   }, [addChoresToDatabase, choreFormSubmission]);
 
   return (
-    <div className="relative h-full w-3/4 border border-white">
+    <div className="relative h-full w-3/4 border border border-neutral-300 shadow">
       <h3 className="pt-2 text-center text-xl font-bold">Weekly Chores</h3>
       <div className="absolute right-2 top-2">
         <Modal
           open={modalOpen}
           onCancel={() => setModalOpen(false)}
           onOk={handleAddNewChore}
+          footer={[
+            <Button
+              type="default"
+              key="cancel"
+              onClick={() => setModalOpen(false)}
+            >
+              Cancel
+            </Button>,
+            <Button className="bg-neutral-700" type="primary" key="submit">
+              Submit
+            </Button>,
+          ]}
         >
           <div className="grid h-48 w-full grid-cols-3 pt-12  ">
             <div>Chore Name:</div>

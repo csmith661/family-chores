@@ -1,8 +1,9 @@
 "use-client";
 import { useDraggable } from "@dnd-kit/core";
-import { type ReactNode, useMemo } from "react";
+import { type ReactNode, useMemo, useCallback } from "react";
 import clsx from "clsx";
-import { DraggableChore } from "@/pages";
+import { ListedChore, type DraggableChore } from "@/pages";
+import { useChoreOperations } from "@/hook/useChoreOperations";
 
 export function DraggableChoreBlock(props: {
   id: number;
@@ -63,6 +64,7 @@ export function Chore(props: { DraggableChore: DraggableChore }) {
         "flex-col",
         assigneeBackgroundColor,
         "relative",
+        "shadow",
       )}
     >
       <h3>{chore_name}</h3>
@@ -70,12 +72,14 @@ export function Chore(props: { DraggableChore: DraggableChore }) {
   );
 }
 
-export function ListedChore(props: {
-  draggableChore: DraggableChore;
+export function ListedChoreComponent(props: {
+  listedChore: ListedChore;
   handleClose: (id: number, day: number) => void;
   day: number;
 }) {
-  const { chore_name, assignee, id } = props.draggableChore;
+  const { chore_name, assignee, id, finished } = props.listedChore;
+
+  const choreUpdate = useChoreOperations();
 
   const assigneeBackgroundColor = useMemo(() => {
     switch (assignee) {
@@ -88,6 +92,20 @@ export function ListedChore(props: {
     }
   }, [assignee]);
 
+  const handleCheckOffChore = useCallback(
+    (chore_id: number) => {
+      choreUpdate({ chore_id, operation: "complete" });
+    },
+    [choreUpdate],
+  );
+
+  const handleRemoveChore = useCallback(
+    (chore_id: number) => {
+      choreUpdate({ chore_id, operation: "delete" });
+    },
+    [choreUpdate],
+  );
+
   return (
     <div
       className={clsx(
@@ -99,6 +117,7 @@ export function ListedChore(props: {
         "grid",
         "grid-cols-3",
         assigneeBackgroundColor,
+        finished ? "line-through" : "",
         "relative",
       )}
     >
@@ -106,7 +125,7 @@ export function ListedChore(props: {
       <button
         className={" hover:text-red-300"}
         onClick={() => {
-          props.handleClose(id, props.day);
+          handleRemoveChore(id);
         }}
       >
         X
@@ -115,7 +134,7 @@ export function ListedChore(props: {
       <button
         className={"hover:text-red-300"}
         onClick={() => {
-          props.handleClose(id, props.day);
+          handleCheckOffChore(id);
         }}
       >
         check

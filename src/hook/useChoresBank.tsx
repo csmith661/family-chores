@@ -1,6 +1,6 @@
 import { api } from "@/utils/api";
 
-export function useActiveChoresQuery() {
+export function useChoresBankQuery() {
   const query = api.chores.getChoresBank.useQuery(undefined, {
     refetchInterval: 6000000,
   });

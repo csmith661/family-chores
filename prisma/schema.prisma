@@ -30,6 +30,7 @@ model SelectedChore {
   chore        Chore @relation(fields: [chore_id], references: [id])
   chore_id     Int
   assigned_day Int
+  finished    Boolean
 
   Week   Week? @relation(fields: [weekId], references: [id])
   weekId Int?

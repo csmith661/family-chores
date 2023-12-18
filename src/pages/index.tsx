@@ -10,22 +10,20 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import dayjs from "dayjs";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   CalendarBlock,
   DraggableCalendarBlock,
 } from "@/components/CalendarBlock";
 import { Chore, DraggableChoreBlock } from "@/components/ChoreBlock";
 import { Clock } from "@/components/Clock";
-import { useActiveChoresQuery } from "@/hook/useActiveChoresQuery";
+import { useChoresBankQuery } from "@/hook/useChoresBank";
 import { ChoresBank } from "@/components/ChoresBank";
+import { useActiveChoresQuery } from "@/hook/useActiveChores";
+import { useAddActiveChores } from "@/hook/useAddActiveChores";
+import weekOfYear from "dayjs";
 
-// const stockChores = [
-//   { id: 12, title: "Kitty Litter", assignee: "Connor" },
-//   { id: 123, title: "Mop", assignee: "Jenny" },
-//   { id: 1234, title: "Vacuum", assignee: "Jenny" },
-//   { id: 12345, title: "Wipe the Counters", assignee: "Connor" },
-// ];
+dayjs.extend(weekOfYear);
 
 type Chore = {
   id: number;
@@ -39,8 +37,12 @@ export type DraggableChore = {
   id: number;
 };
 
+export interface ListedChore extends DraggableChore {
+  finished: boolean;
+}
+
 function initializeDaysOfTheWeekMap() {
-  const daysOfWeek = new Map<string, DraggableChore[]>();
+  const daysOfWeek = new Map<string, ListedChore[]>();
 
   for (let i = 0; i < 7; i++) {
     daysOfWeek.set(i.toString(), []);
@@ -50,7 +52,9 @@ function initializeDaysOfTheWeekMap() {
 }
 
 function App() {
-  const choresBankQuery = useActiveChoresQuery();
+  const choresBankQuery = useChoresBankQuery();
+  const activeChoresQuery = useActiveChoresQuery();
+  const addActiveChores = useAddActiveChores();
   const currentDay = useMemo(() => {
     return dayjs().format("dddd DD/MM");
   }, []);
@@ -60,28 +64,8 @@ function App() {
 
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
 
-  const [workingDaysOfWeek, setWorkingDaysOfWeek] = useState(
-    initializeDaysOfTheWeekMap(),
-  );
-
-  // const daysOfTheWeekArray = useMemo(() => {
-  //   const datesArray: string[] = new Array(7);
-
-  //   const currentDaysIndex = dayjs().day();
-
-  //   datesArray[currentDaysIndex] = currentDay;
-
-  //   for (let i = 0; i < datesArray.length; i++) {
-  //     if (datesArray[i]) {
-  //       continue;
-  //     }
-  //     datesArray[i] = dayjs()
-  //       .subtract(currentDaysIndex - i, "day")
-  //       .format("dddd DD/MM");
-  //   }
-
-  //   return datesArray;
-  // }, [currentDay]);
+  const [workingDaysOfWeek, setWorkingDaysOfWeek] =
+    useState<Map<string, ListedChore[]>>();
 
   function handleDragStart(dragEvent: DragStartEvent) {
     setActiveDraggingChore(() => {
@@ -105,13 +89,24 @@ function App() {
       const day = dragEvent.over.id.toString();
 
       setWorkingDaysOfWeek((daysMap) => {
+        if (!daysMap) return;
         const array = daysMap.get(day);
         if (!array) throw Error("Improper Configuration");
-        const newArray = [...array, activeChore];
+
+        const convertedChoreToListed = {
+          finished: false,
+          ...activeChore,
+        };
+        const newArray = [...array, convertedChoreToListed];
 
         daysMap.set(day, newArray);
 
         return daysMap;
+      });
+
+      addActiveChores({
+        chore_id: activeChore.id,
+        dayOfTheWeekInt: parseInt(day),
       });
     }
 
@@ -119,7 +114,7 @@ function App() {
   }
 
   function handleClose(id: number, day: number) {
-    console.log(id, day);
+    if (!workingDaysOfWeek) return;
     const deepClonedMap = deepCloneMap(workingDaysOfWeek);
 
     const daysArray = deepClonedMap
@@ -131,6 +126,51 @@ function App() {
     setWorkingDaysOfWeek(deepClonedMap);
   }
 
+  useEffect(() => {
+    if (!workingDaysOfWeek && activeChoresQuery.isLoading) {
+      const intializedMap = initializeDaysOfTheWeekMap();
+
+      setWorkingDaysOfWeek(intializedMap);
+    }
+  }, [
+    activeChoresQuery.data,
+    activeChoresQuery.isLoading,
+    activeChoresQuery.isSuccess,
+    workingDaysOfWeek,
+  ]);
+
+  useEffect(() => {
+    if (activeChoresQuery.data) {
+      const workingDaysMap = new Map<string, ListedChore[]>();
+
+      const queriedArray = Object.keys(activeChoresQuery.data);
+
+      queriedArray.forEach((key) => {
+        if (activeChoresQuery.data[key]) {
+          workingDaysMap.set(key, activeChoresQuery.data[key] ?? []);
+        }
+      });
+
+      setWorkingDaysOfWeek((workingDays) => {
+        if (workingDays) {
+          const clonedDays = deepCloneMap(workingDays);
+
+          for (let i = 0; i < 7; i++) {
+            clonedDays?.set(
+              i.toString(),
+              workingDaysMap.get(i.toString()) ?? [],
+            );
+          }
+
+          return clonedDays;
+        }
+        return workingDays;
+      });
+    }
+  }, [activeChoresQuery.data]);
+
+  console.log(workingDaysOfWeek);
+
   return (
     <>
       <DndContext
@@ -138,36 +178,37 @@ function App() {
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="bg-slate-200">
+        <div className="">
           <div>
             <div className="px-4">The time is currently:</div>
             <h1 className="px-4 text-2xl font-bold">
               <Clock />
             </h1>
             <div className="flex h-[50vh] items-center justify-center gap-2 p-4">
-              {Array.from(workingDaysOfWeek.keys()).map((day, index) => {
-                const dateText = dayjs()
-                  .day(parseInt(day))
-                  .format("dddd - MM/DD");
+              {workingDaysOfWeek &&
+                Array.from(workingDaysOfWeek.keys()).map((day, index) => {
+                  const dateText = dayjs()
+                    .day(parseInt(day))
+                    .format("dddd - MM/DD");
 
-                const choresArray = workingDaysOfWeek.get(day);
+                  const choresArray = workingDaysOfWeek.get(day);
 
-                if (!choresArray) return;
+                  if (!choresArray) return;
 
-                return (
-                  <DraggableCalendarBlock
-                    key={(index * 1000).toString()}
-                    id={day}
-                  >
-                    <CalendarBlock
-                      dateForCalendar={dateText}
-                      choresArray={choresArray}
-                      handleClose={handleClose}
-                      day={parseInt(day)}
-                    />
-                  </DraggableCalendarBlock>
-                );
-              })}
+                  return (
+                    <DraggableCalendarBlock
+                      key={(index * 1000).toString()}
+                      id={day}
+                    >
+                      <CalendarBlock
+                        dateForCalendar={dateText}
+                        choresArray={choresArray}
+                        handleClose={handleClose}
+                        day={parseInt(day)}
+                      />
+                    </DraggableCalendarBlock>
+                  );
+                })}
             </div>
 
             <div className="flex h-[40vh] gap-2 p-4">
@@ -175,7 +216,7 @@ function App() {
               <div>
                 <DragOverlay dropAnimation={null} className="cursor-grabbing">
                   {activeDraggingChore ? (
-                    <div className="h-20 w-48">
+                    <div className="h-20 w-72">
                       <Chore DraggableChore={activeDraggingChore} />
                     </div>
                   ) : null}
@@ -193,14 +234,14 @@ function App() {
 export default App;
 
 function deepCloneMap(
-  inputMap: Map<string, DraggableChore[]>,
-): Map<string, DraggableChore[]> {
-  const clonedMap = new Map<string, DraggableChore[]>();
+  inputMap: Map<string, ListedChore[]>,
+): Map<string, ListedChore[]> {
+  const clonedMap = new Map<string, ListedChore[]>();
 
   for (const [key, value] of inputMap) {
     // Clone the array of DraggableChore objects
-    const clonedValue: DraggableChore[] = value.map((item) =>
-      deepCloneDraggableChore(item),
+    const clonedValue: ListedChore[] = value.map((item) =>
+      deepCloneListedChore(item),
     );
     clonedMap.set(key, clonedValue);
   }
@@ -208,7 +249,7 @@ function deepCloneMap(
   return clonedMap;
 }
 
-function deepCloneDraggableChore(chore: DraggableChore): DraggableChore {
+function deepCloneListedChore(chore: ListedChore): ListedChore {
   if (!chore) {
     return chore;
   }
@@ -218,5 +259,6 @@ function deepCloneDraggableChore(chore: DraggableChore): DraggableChore {
     chore_name: chore.chore_name,
     assignee: chore.assignee,
     id: chore.id,
+    finished: chore.finished,
   };
 }
