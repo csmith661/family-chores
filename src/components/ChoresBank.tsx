@@ -25,7 +25,7 @@ export function ChoresBank() {
   }, [addChoresToDatabase, choreFormSubmission]);
 
   return (
-    <div className="relative h-full w-3/4 border border border-neutral-300 shadow">
+    <div className="relative h-full w-3/4 rounded-md border border border-neutral-300 bg-white shadow">
       <h3 className="pt-2 text-center text-xl font-bold">Weekly Chores</h3>
       <div className="absolute right-2 top-2">
         <Modal

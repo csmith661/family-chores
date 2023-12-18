@@ -22,6 +22,7 @@ import { ChoresBank } from "@/components/ChoresBank";
 import { useActiveChoresQuery } from "@/hook/useActiveChores";
 import { useAddActiveChores } from "@/hook/useAddActiveChores";
 import weekOfYear from "dayjs";
+import clsx from "clsx";
 
 dayjs.extend(weekOfYear);
 
@@ -56,7 +57,7 @@ function App() {
   const activeChoresQuery = useActiveChoresQuery();
   const addActiveChores = useAddActiveChores();
   const currentDay = useMemo(() => {
-    return dayjs().format("dddd DD/MM");
+    return dayjs().day().toString();
   }, []);
 
   const [activeDraggingChore, setActiveDraggingChore] =
@@ -88,6 +89,14 @@ function App() {
     if (dragEvent.over) {
       const day = dragEvent.over.id.toString();
 
+      if (
+        workingDaysOfWeek
+          ?.get(day)
+          ?.find((chore) => chore.chore_name === activeChore.chore_name)
+      ) {
+        setActiveDraggingChore(null);
+        return;
+      }
       setWorkingDaysOfWeek((daysMap) => {
         if (!daysMap) return;
         const array = daysMap.get(day);
@@ -178,7 +187,7 @@ function App() {
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="">
+        <div className="h-[100vh] bg-neutral-50">
           <div>
             <div className="px-4">The time is currently:</div>
             <h1 className="px-4 text-2xl font-bold">
@@ -196,17 +205,27 @@ function App() {
                   if (!choresArray) return;
 
                   return (
-                    <DraggableCalendarBlock
+                    <div
                       key={(index * 1000).toString()}
-                      id={day}
+                      className="relative h-full w-full"
                     >
-                      <CalendarBlock
-                        dateForCalendar={dateText}
-                        choresArray={choresArray}
-                        handleClose={handleClose}
-                        day={parseInt(day)}
-                      />
-                    </DraggableCalendarBlock>
+                      <DraggableCalendarBlock id={day} day={parseInt(day)}>
+                        <CalendarBlock
+                          dateForCalendar={dateText}
+                          choresArray={choresArray}
+                          handleClose={handleClose}
+                          day={parseInt(day)}
+                        />
+                      </DraggableCalendarBlock>
+                      <div
+                        className={clsx(
+                          "absolute top-0 z-0 h-full w-full",
+                          currentDay === day
+                            ? "animate-pulse shadow-[0_0_2px_#fff,inset_0_0_2px_#fff,0_0_5px_#08f,0_0_10px_#08f,0_0_20px_#08f] shadow-lg"
+                            : "shadow",
+                        )}
+                      ></div>
+                    </div>
                   );
                 })}
             </div>

@@ -1,13 +1,15 @@
 "use-client";
 import { useDroppable } from "@dnd-kit/core";
 import { type ReactNode } from "react";
-import { ListedChore, type DraggableChore } from "../pages/index";
-import { ListedChoreComponent } from "./ChoreBlock";
+import { ListedChore } from "../pages/index";
+import { ListedChoreComponent } from "./ListedChoreComponent";
+import clsx from "clsx";
 import dayjs from "dayjs";
 
 export function DraggableCalendarBlock(props: {
   children: ReactNode;
   id: string;
+  day: number;
 }) {
   //go and fetch sample items for chores
 
@@ -22,7 +24,9 @@ export function DraggableCalendarBlock(props: {
     <div
       ref={setNodeRef}
       style={style}
-      className="h-full w-full rounded border border-neutral-300 shadow"
+      className={clsx(
+        "z-10 h-full w-full rounded border border-neutral-300 bg-white",
+      )}
     >
       {props.children}
     </div>
@@ -37,7 +41,11 @@ export function CalendarBlock(props: {
 }) {
   return (
     <>
-      <div className="border-r-neutral-200/1000 z-40 rounded border  border-b-neutral-200  border-l-neutral-200/100 border-t-white/100 p-2">
+      <div
+        className={clsx(
+          "border-r-neutral-200/1000 z-40 rounded-md border border-b-neutral-200  border-l-neutral-200/100  border-t-white/100 bg-blue-50 p-2",
+        )}
+      >
         <h2 className="text-center font-bold">{`${props.dateForCalendar}`}</h2>
       </div>
       <div className="no-scrollbar h-[90%] overflow-y-scroll">

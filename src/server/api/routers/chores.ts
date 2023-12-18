@@ -44,7 +44,7 @@ export const choresRouter = createTRPCRouter({
     .query(async({ctx, input}) => {
          const addedChores = await ctx.db.selectedChore.findMany({select: {id: true, assigned_day: true, finished: true, chore: {select:{chore_name: true, assignee: true}}}})
         const returnObject: Record<string, {id: number, chore_name: string, assignee: string, finished: boolean}[]> = {}
-        console.log(addedChores)
+    
         addedChores.forEach((choreInfo)=> {
           
           if(returnObject[choreInfo.assigned_day.toString()]){
