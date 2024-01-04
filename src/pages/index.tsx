@@ -23,6 +23,7 @@ import { useActiveChoresQuery } from "@/hook/useActiveChores";
 import { useAddActiveChores } from "@/hook/useAddActiveChores";
 import weekOfYear from "dayjs";
 import clsx from "clsx";
+import { NotesBlock } from "@/components/NotesBlock";
 
 dayjs.extend(weekOfYear);
 
@@ -178,8 +179,6 @@ function App() {
     }
   }, [activeChoresQuery.data]);
 
-  console.log(workingDaysOfWeek);
-
   return (
     <>
       <DndContext
@@ -230,7 +229,7 @@ function App() {
                 })}
             </div>
 
-            <div className="flex h-[40vh] gap-2 p-4">
+            <div className="flex h-[40vh] w-full gap-2 p-4">
               <ChoresBank />
               <div>
                 <DragOverlay dropAnimation={null} className="cursor-grabbing">
@@ -240,8 +239,8 @@ function App() {
                     </div>
                   ) : null}
                 </DragOverlay>
-                <h3 className="border">Notes</h3>
               </div>
+              <NotesBlock />
             </div>
           </div>
         </div>
