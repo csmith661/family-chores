@@ -1,7 +1,7 @@
-import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import dayjs from 'dayjs';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
+import { z } from "zod";
+import { createTRPCRouter, publicProcedure } from "../trpc";
 
 dayjs.extend(weekOfYear)
 
@@ -41,7 +41,7 @@ export const choresRouter = createTRPCRouter({
     getAllAddedChores: publicProcedure
     .input(z.undefined())
     .output((z.record(z.object({id: z.number(), chore_name: z.string(), assignee: z.string(), finished: z.boolean()}).array())))
-    .query(async({ctx, input}) => {
+    .query(async({ctx,}) => {
          const addedChores = await ctx.db.selectedChore.findMany({select: {id: true, assigned_day: true, finished: true, chore: {select:{chore_name: true, assignee: true}}}})
         const returnObject: Record<string, {id: number, chore_name: string, assignee: string, finished: boolean}[]> = {}
     
