@@ -22,6 +22,15 @@ jobs:
       -
         name: Build Next
         run: docker build -t csmith661/react-fc .
+        env:
+          DATABASE_URL: ${{secrets.DATABASE_URL}}
+          NEXTAUTH_SECRET: ${{secrets.NEXTAUTH_SECRET}}
+          NEXTAUTH_URL: ${{secrets.NEXTAUTH_URL}}
+          EMAIL_SERVER_USER: "blank"
+          EMAIL_SERVER_PASSWORD: "blank"
+          EMAIL_SERVER_HOST: "BLANK"
+          EMAIL_SERVER_PORT: 'BLANK'
+          EMAIL_FROM: "BLANK"
           
 
       -
