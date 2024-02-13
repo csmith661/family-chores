@@ -27,6 +27,7 @@ export const choresRouter = createTRPCRouter({
     .mutation(async({ctx, input}) => {
       const newChore = await ctx.db.selectedChore.create({data: {chore_id: input.chore_id, assigned_day: input.dayOfTheWeekInt, finished: false}, select: {id: true, assigned_day: true, finished: true, chore: {select: {assignee: true, chore_name: true}}}})
       
+      //add nonsense comments here
       const synthesizedNewChore = {
         id: newChore.id,
         chore_name: newChore.chore.chore_name,
