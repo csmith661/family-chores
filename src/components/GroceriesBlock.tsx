@@ -113,7 +113,7 @@ function GroceryItem(props: { id: number; item: string; editing: boolean }) {
   }, [groceryOperations, id])
 
   return (
-    <div className=" flex h-full w-full items-center justify-center border p-1">
+    <div className=" flex h-full w-full items-center justify-center border p-1 bg-slate-100">
       <div className="flex w-full items-center justify-center">{item}</div>
       {editing && (
         <div className="flex w-1/4 items-center">
