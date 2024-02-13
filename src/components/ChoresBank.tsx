@@ -4,6 +4,7 @@ import { Button, Input, Modal, Select } from "antd";
 import { useState } from "react";
 import { useCallback } from "react";
 import { useCreateChoresQuery } from "@/hook/useCreateNewChore";
+import { useDeleteChore } from "@/hook/useDeleteChore";
 
 export function ChoresBank() {
   const choresBankQuery = useChoresBankQuery();
@@ -11,6 +12,8 @@ export function ChoresBank() {
   const addChoresToDatabase = useCreateChoresQuery();
 
   const [modalOpen, setModalOpen] = useState(false);
+
+  const [isEditing, setIsEditing] = useState(false)
 
   const [choreFormSubmission, setChoreFormSubmission] = useState<{
     chore_name: string;
@@ -24,14 +27,21 @@ export function ChoresBank() {
     } else return;
   }, [addChoresToDatabase, choreFormSubmission]);
 
+  const deleteChoreFromBank = useDeleteChore()
+
+  const handleDeleteItem = useCallback((id:number)=>{
+    deleteChoreFromBank({chore_id: id})
+
+  }, [deleteChoreFromBank])
+
   return (
     <div className="relative h-full w-3/4 rounded-md border border border-neutral-300 bg-white shadow">
       <h3 className="pt-2 text-center text-xl font-bold">Weekly Chores</h3>
-      <div className="absolute right-2 top-2">
+      <div className="absolute right-2 top-2 flex gap-2">
         <Modal
           open={modalOpen}
           onCancel={() => setModalOpen(false)}
-          onOk={handleAddNewChore}
+          
           footer={[
             <Button
               type="default"
@@ -40,7 +50,7 @@ export function ChoresBank() {
             >
               Cancel
             </Button>,
-            <Button className="bg-neutral-700" type="primary" key="submit">
+            <Button className="bg-neutral-700" type="primary" key="submit" onClick={handleAddNewChore}>
               Submit
             </Button>,
           ]}
@@ -86,14 +96,35 @@ export function ChoresBank() {
         >
           Add New Chore
         </Button>
+        <Button
+          onClick={() => {
+              setIsEditing(!isEditing);          
+          }}
+          type="primary"
+          className="bg-neutral-700"
+        >
+          Edit Chores
+        </Button>
       </div>
       <div className="no-scrollbar flex h-full flex-wrap justify-center overflow-y-scroll">
         {choresBankQuery.data?.map((chore) => {
-          return (
-            <DraggableChoreBlock key={chore.id} id={chore.id}>
-              <Chore DraggableChore={chore} />
-            </DraggableChoreBlock>
-          );
+
+          if(!isEditing){
+            return (
+              <DraggableChoreBlock key={chore.id} id={chore.id} >
+                <Chore DraggableChore={chore} isEditing={isEditing} handleDeleteItem={handleDeleteItem} bankModifer={true}/>
+              </DraggableChoreBlock>
+            );
+          }
+          if(isEditing){
+            return (
+              <div key={chore.id}       className="h-1/4 w-1/6 p-2"
+              >
+                <Chore DraggableChore={chore} isEditing={isEditing} handleDeleteItem={handleDeleteItem} bankModifer={true} />
+              </div>
+
+            )
+          }
         })}
       </div>
     </div>

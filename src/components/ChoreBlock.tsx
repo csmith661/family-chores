@@ -1,12 +1,15 @@
 "use-client";
 import { type DraggableChore } from "@/pages";
+import { CloseOutlined } from "@ant-design/icons";
 import { useDraggable } from "@dnd-kit/core";
+import { Button } from "antd";
 import clsx from "clsx";
 import { useMemo, type ReactNode } from "react";
 
 export function DraggableChoreBlock(props: {
   id: number;
   children: ReactNode;
+
 }) {
   const { id } = props;
   const { attributes, listeners, setNodeRef, transform, active } = useDraggable(
@@ -14,6 +17,8 @@ export function DraggableChoreBlock(props: {
       id,
     },
   );
+
+
 
   const style = transform
     ? {
@@ -31,12 +36,16 @@ export function DraggableChoreBlock(props: {
       {...attributes}
     >
       {props.children}
+      
     </div>
   );
 }
 
-export function Chore(props: { DraggableChore: DraggableChore }) {
-  const { chore_name, assignee } = props.DraggableChore;
+export function Chore(props: { DraggableChore: DraggableChore,   isEditing?: boolean;
+  handleDeleteItem?: (id: number) => void, bankModifer?: boolean }) {
+  const { chore_name, assignee, id } = props.DraggableChore;
+
+  const {isEditing, handleDeleteItem, bankModifer} = props
 
   const assigneeBackgroundColor = useMemo(() => {
     switch (assignee) {
@@ -67,6 +76,13 @@ export function Chore(props: { DraggableChore: DraggableChore }) {
       )}
     >
       <h3>{chore_name}</h3>
+
+      {isEditing && bankModifer && (
+        <div className="flex items-center absolute right-0 top-0">
+          <Button type="text" icon={<CloseOutlined />} danger onClick={()=> handleDeleteItem ? handleDeleteItem(id) : null}/>
+        </div>
+      )}
+      
     </div>
   );
 }

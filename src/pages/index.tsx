@@ -6,7 +6,7 @@ import {
 import { Chore } from "@/components/ChoreBlock";
 import { ChoresBank } from "@/components/ChoresBank";
 import { Clock } from "@/components/Clock";
-import { NotesBlock } from "@/components/NotesBlock";
+import { GroceriesBlock } from "@/components/GroceriesBlock";
 import { useActiveChoresQuery } from "@/hook/useActiveChores";
 import { useAddActiveChores } from "@/hook/useAddActiveChores";
 import { useChoresBankQuery } from "@/hook/useChoresBank";
@@ -215,14 +215,7 @@ function App() {
                           day={parseInt(day)}
                         />
                       </DraggableCalendarBlock>
-                      <div
-                        className={clsx(
-                          "absolute top-0 z-0 h-full w-full",
-                          currentDay === day
-                            ? "animate-pulse shadow-[0_0_2px_#fff,inset_0_0_2px_#fff,0_0_5px_#08f,0_0_10px_#08f,0_0_20px_#08f] shadow-lg"
-                            : "shadow",
-                        )}
-                      ></div>
+                     
                     </div>
                   );
                 })}
@@ -239,7 +232,7 @@ function App() {
                   ) : null}
                 </DragOverlay>
               </div>
-              <NotesBlock />
+              <GroceriesBlock />
             </div>
           </div>
         </div>

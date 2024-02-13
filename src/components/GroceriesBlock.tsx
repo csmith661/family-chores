@@ -1,40 +1,38 @@
-import { useChoresBankQuery } from "@/hook/useChoresBank";
-import { DraggableChoreBlock, Chore } from "./ChoreBlock";
-import { Button, Input, Modal, Select } from "antd";
-import { useMemo, useState } from "react";
-import { useCallback } from "react";
-import { useCreateChoresQuery } from "@/hook/useCreateNewChore";
+import { useGetGroceriesBank } from "@/hook/useGetGroceriesBank";
+import { useGroceryOperations } from "@/hook/useGroceryListOperations";
 import { CloseOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
+import { Button, Input, Modal } from "antd";
+import { useCallback, useState } from "react";
 
-type GroceryListType = {
-  id: number;
-  item: string;
-};
 
-const Groceries: GroceryListType[] = [
-  { id: 1, item: "Peanut Butter" },
-  { id: 2, item: "Ham" },
-];
 
-export function NotesBlock() {
+export function GroceriesBlock() {
   const [modalOpen, setModalOpen] = useState(false);
+
+  const groceryOperations = useGroceryOperations()
+
+  const groceriesQuery = useGetGroceriesBank() 
 
   const [groceryItem, setGroceryItem] = useState<string | null>(null);
   const handleAddNewGroceryItem = useCallback(() => {
-    return null;
-  }, []);
+
+    
+    if(groceryItem){
+      groceryOperations({operation: 'add', grocery_name: groceryItem})
+    }
+
+    setModalOpen(false)
+  }, [groceryItem, groceryOperations]);
+
+  const handleCloseModal = useCallback(()=>{
+    setModalOpen(false)
+    setGroceryItem(null)
+  }, [])
 
   const [editing, setEditing] = useState(false);
-  const groceryListSnapshot = useMemo(() => {
-    if (editing) {
-      return structuredClone(Groceries);
-    }
-    if (!editing) {
-      return null;
-    }
-  }, [editing]);
 
-  console.log(groceryListSnapshot);
+
+
 
   return (
     <div className="h-full w-1/4">
@@ -43,23 +41,22 @@ export function NotesBlock() {
         <div className="absolute right-2 top-2">
           <Modal
             open={modalOpen}
-            onCancel={() => setModalOpen(false)}
-            onOk={handleAddNewGroceryItem}
+            onCancel={handleCloseModal}
             footer={[
               <Button
                 type="default"
                 key="cancel"
-                onClick={() => setModalOpen(false)}
+                onClick={handleCloseModal}
               >
                 Cancel
               </Button>,
-              <Button className="bg-neutral-700" type="primary" key="submit">
+              <Button onClick={handleAddNewGroceryItem} className="bg-neutral-700" type="primary" key="ok">
                 Submit
               </Button>,
             ]}
           >
             <div className="grid h-48 w-full grid-cols-3 pt-12  ">
-              <div>Chore Name:</div>
+              <div>Grocery Name:</div>
               <div className="col-span-2">
                 <Input
                   onChange={(event) =>
@@ -67,7 +64,6 @@ export function NotesBlock() {
                   }
                 />
               </div>
-              <div>Assignee: </div>
               <div className="col-span-2"></div>
             </div>
           </Modal>
@@ -94,11 +90,11 @@ export function NotesBlock() {
           </div>
         </div>
         <div className="grid h-[90%] grid-cols-2 grid-rows-6 flex-col gap-2 p-2">
-          {Groceries.map((item) => (
+          {groceriesQuery.data?.map((item) => (
             <GroceryItem
               key={item.id}
               id={item.id}
-              item={item.item}
+              item={item.name}
               editing={editing}
             />
           ))}
@@ -109,13 +105,19 @@ export function NotesBlock() {
 }
 
 function GroceryItem(props: { id: number; item: string; editing: boolean }) {
+  const groceryOperations = useGroceryOperations()
+
   const { id, item, editing } = props;
+  const handleDeleteItem = useCallback(()=>{
+    groceryOperations(({operation: 'delete', grocery_id: id}))
+  }, [groceryOperations, id])
+
   return (
     <div className=" flex h-full w-full items-center justify-center border p-1">
       <div className="flex w-full items-center justify-center">{item}</div>
       {editing && (
         <div className="flex w-1/4 items-center">
-          <Button type="text" icon={<CloseOutlined />} danger />
+          <Button type="text" icon={<CloseOutlined />} danger onClick={handleDeleteItem}/>
         </div>
       )}
     </div>

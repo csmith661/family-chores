@@ -1,10 +1,9 @@
 "use-client";
 import { useDroppable } from "@dnd-kit/core";
 import { type ReactNode } from "react";
-import { ListedChore } from "../pages/index";
+import { type ListedChore } from "../pages/index";
 import { ListedChoreComponent } from "./ListedChoreComponent";
 import clsx from "clsx";
-import dayjs from "dayjs";
 
 export function DraggableCalendarBlock(props: {
   children: ReactNode;

@@ -27,7 +27,7 @@ model Chore {
 
 model SelectedChore {
   id           Int   @id @default(autoincrement())
-  chore        Chore @relation(fields: [chore_id], references: [id])
+  chore        Chore @relation(fields: [chore_id], references: [id], onDelete: Cascade)
   chore_id     Int
   assigned_day Int
   finished    Boolean
@@ -39,4 +39,9 @@ model SelectedChore {
 model Week {
   id     Int              @id
   chores SelectedChore[]
+}
+
+model Grocery {
+  id           Int   @id @default(autoincrement())
+  name String @unique
 }
