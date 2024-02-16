@@ -1,4 +1,4 @@
-FROM nginx:stable-alpine3.17-perl@sha256:37fa3f16c599f30e06ade5b7dfde3939d11b8ef4fbfc76149e6911a691d6c089
+FROM nginx:mainline-bookworm
 
 # Remove any existing config files
 RUN rm /etc/nginx/conf.d/*
